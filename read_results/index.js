@@ -102,11 +102,11 @@ function dispatch(intentRequest, callback) {
         let job_summary = job_details['snippet'];
 
         let message_response = "Title: " + job_details['jobtitle'] +
-          "\n Company: " + job_details['company'] +
-          "\n Summary: " + "\n" + job_summary +
+          "\nCompany: " + job_details['company'] +
+          "\nSummary: " + "\n" + job_summary +
           "\n" +
-          "\n URL: " + job_details['url'] +
-          "\n posted " + job_details['formattedRelativeTime'] +
+          "\nURL: " + job_details['url'] +
+          "\nposted " + job_details['formattedRelativeTime'] +
           "\n" +
           "\n" + "Do you want me to bookmark this job for you or move on to the next one?";
 

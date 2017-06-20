@@ -99,11 +99,11 @@ function dispatch(intentRequest, callback) {
       console.log("User already exists, so we start the search...");
       console.log(user);
 
-      let user_attributes = user['Item'];
-      let country = user_attributes['country'];
-      let city = user_attributes['city'];
-      let keywords = user_attributes['keywords'];
-      let jobType = user_attributes['jobType'];
+      let userAttributes = user['Item'];
+      let country = userAttributes['country'];
+      let city = userAttributes['city'];
+      let keywords = userAttributes['keywords'];
+      let jobType = userAttributes['jobType'];
 
       // let glassdoor_url = 'http://api.glassdoor.com/api/api.htm?' +
       //   't.p=' + process.env.GLASSDOOR_PARTNER_ID +
@@ -140,12 +140,10 @@ function dispatch(intentRequest, callback) {
             let jobResultsJson = result['response']['results'][0]['result'];
             let totalResults = result['response']['totalresults'];
 
-            console.log(jobResultsJson);
-
-            if (jobResultsJson.length > 0) {
+            if (jobResultsJson) {
               console.log('We found a couple of jobs...yay! Updating the user...');
 
-              updateUserSearchResults(user_attributes['userId'], jobResultsJson)
+              updateUserSearchResults(userAttributes['userId'], jobResultsJson)
                 .then(function (data) {
                   callback(
                     confirmIntent(
@@ -162,6 +160,17 @@ function dispatch(intentRequest, callback) {
                 }).catch(console.error.bind(console));
             } else {
               console.log("We couldn't find any jobs :( Search again?");
+              callback(
+                confirmIntent(
+                  sessionAttributes,
+                  {
+                    'contentType': 'PlainText',
+                    'content': "I'm sorry but I can't find any " + jobType + " " + keywords + " jobs " +
+                    "in " + country + ". Would you like to update your search preferences instead?"
+                  },
+                  'FillPreferences'
+                )
+              );
             }
           });
         }
