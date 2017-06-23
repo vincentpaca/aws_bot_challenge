@@ -109,7 +109,7 @@ function dispatch(intentRequest, callback) {
           "\n" +
           "\nThere are a few things I can do for you: " +
           "\n" +
-          "\nI can show you the summary of this job posting," +
+          "\nI can show you the summary of the job description," +
           "\n" +
           "\nI can bookmark this job for later," +
           "\n" +
