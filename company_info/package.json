@@ -1,0 +1,16 @@
+{
+  "name": "companyInfo",
+  "version": "0.1.0",
+  "description": "Gives the user more info about the company from the Glassdoor API",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:vincentpaca/aws_bot_challenge.git"
+  },
+  "author": [ "Vincent Paca <vincent.paca@gmail.com" ],
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.74.0",
+    "request": "*"
+  }
+}
