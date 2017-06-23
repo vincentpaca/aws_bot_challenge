@@ -2,7 +2,6 @@
 
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
-const request = require('request');
 
 function elicitIntent(sessionAttributes, message) {
   return {
@@ -94,59 +93,45 @@ function dispatch(intentRequest, callback) {
 
         // Check if we have an existing readIndex for the user, if none then we start at the beginning.
         let readingIndex = 0;
+
         if (userAttributes['readingIndex']) {
           readingIndex = userAttributes['readingIndex'];
         }
+
         let job_details = searchResults[readingIndex];
+        console.log(job_details);
 
-        // By default, let's use the snippet from Indeed as the summary
-        let job_summary = job_details['snippet'];
+        let message_response = "Title: " + job_details['jobtitle'] +
+          "\nCompany: " + job_details['company'] +
+          "\nSnippet: " + job_details['snippet'] +
+          "\nURL: " + job_details['url'] +
+          "\nposted " + job_details['formattedRelativeTime'] +
+          "\n" +
+          "\nThere are a few things I can do for you: " +
+          "\n" +
+          "\nI can show you the summary of this job posting," +
+          "\n" +
+          "\nI can bookmark this job for later," +
+          "\n" +
+          "\nI can also give you more information about the company," +
+          "\n" +
+          "\nor I can move on to the next search result. Let me know! :)";
 
-        // but let's try to summarize the entire job posting using the SMMRY API
-        let smmyUrl = 'http://api.smmry.com' +
-            '?SM_API_KEY=' + process.env.SMMRY_API_KEY +
-            '&SM_URL=' + job_details['url'];
+        // We increase the reading index so the next time they resume search, it will read the next in the queue.
+        console.log("bumping reading index...");
+        readingIndex++;
+        updateUserSearchIndex(userAttributes['userId'], readingIndex).catch(console.error.bind(console));
 
-        request(smmyUrl, function (err, response, body) {
-          if (err) {
-            console.log("Got an error from the SMMRY API: " + err);
-          } else {
-            // We use SMMRY's summary!
-            let smmry_response = JSON.parse(body);
-            job_summary = smmry_response['sm_api_content'];
-            console.log('Job Summary:');
-            console.log(job_summary);
-
-            let message_response = "Title: " + job_details['jobtitle'] +
-              "\nCompany: " + job_details['company'] +
-              "\nSummary: " + "\n" + job_summary +
-              "\n" +
-              "\nURL: " + job_details['url'] +
-              "\nposted " + job_details['formattedRelativeTime'] +
-              "\n" +
-              "\nThere are three things I can do for you: " +
-              "\n" +
-              "\nI can bookmark this job posting," +
-              "\n" +
-              "\nI can also give you more information about the company," +
-              "\n" +
-              "\nor I can move on to the next search result. Let me know! :)";
-
-            // We increase the reading index so the next time they resume search, it will read the next in the queue.
-            readingIndex++;
-            updateUserSearchIndex(userAttributes['userId'], readingIndex);
-
-            callback(
-              elicitIntent(
-                sessionAttributes,
-                {
-                  'contentType': 'PlainText',
-                  'content': message_response
-                }
-              )
-            )
-          }
-        });
+        console.log("trigger intent...");
+        callback(
+          elicitIntent(
+            sessionAttributes,
+            {
+              'contentType': 'PlainText',
+              'content': message_response
+            }
+          )
+        );
       } else {
         // This user doesn't have any searches saved.
         callback(
